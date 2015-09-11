@@ -80,7 +80,7 @@ sub packetHandler
         {
             if (!exists($peers{$destination}))
             {
-                $peers{$destination} = { 'failcount' => 0 };
+                $peers{$destination} = { 'failcount' => 0 , 'banned' => 0};
             }
 
             #only filter for REGISTER and INVITE since we can get some errors for Notify and OPTIONS. it doesn't count.
@@ -100,10 +100,11 @@ sub packetHandler
                 }
             }
             print $logFile localtime() . " Match: $code, method: $method, dest: $destination callid: [$callid], fail:". $peers{$destination}{'failcount'} ."\r\n";
-    
-            if ($peers{$destination}{'failcount'} >= $maxfailcount)
+   
+            if (($peers{$destination}{'failcount'} >= $maxfailcount) && ($peers{$destination}{'banned'} == 0))
             {
-                print $logFile localtime() . " ERROR: Too many failures for hos. Banning\r\n";
+                $peers{$destination}{'banned'} = 1;
+                print $logFile localtime() . " ERROR: Too many failures for host. Banning\r\n";
                 my $iptables = "iptables -A INPUT -s $destination -p udp --destination-port $pbxPort -j DROP";
                 system($iptables);    
 
