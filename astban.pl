@@ -3,15 +3,11 @@
 use Net::Pcap;
 use Socket;
 
-# WARNING: configure this
-my $to = "pat\@localhost";
-my $pbxPort = 5070;
-my $device = "eth0";
-my $exemptNet = "192.168"; # This will exclude local interface as well.
-my $maxfailcount = 10 ; # ban after that number of errors in a row.
-
-
-
+my $to = $ARGV[0];
+my $pbxPort =  $ARGV[1];
+my $device = $ARGV[2];
+my $exemptNet = $ARGV[3];
+my $maxfailcount = $ARGV[4];
 
 
 my $err;
@@ -23,11 +19,11 @@ open(my $logFile, '>>', "/var/log/astban.log") or die "Can't open log file";
 
 print "Listening on interface: $device\r\n";
 
-$pid = fork();
-if ($pid !=0)
-{
-    exit 0;
-}
+#$pid = fork();
+#if ($pid !=0)
+#{
+#    exit 0;
+#}
 
 print $logFile localtime() . " astban started\r\n";
 $logFile->flush();
@@ -110,7 +106,7 @@ sub packetHandler
 
                 open($m, "|/usr/sbin/sendmail -t");
                 print $m "To: $to\n";
-                print $m "From: root\@localhost\n";
+                print $m "From: astban\@dumaisnet.ca\n";
                 print $m "Subject: Astban is banning $destination\n\n";
                 print $m "That guy was causing nothing but trouble!";
                 close($m);
